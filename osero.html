@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>オセロ</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      width: 400px;
+      margin: 0 auto;
+    }
+    td {
+      width: 50px;
+      height: 50px;
+      border: 1px solid #ccc;
+      text-align: center;
+      cursor: pointer;
+    }
+    .black {
+      background-color: #000;
+    }
+    .white {
+      background-color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <table>
+  </table>
+
+  <script>
+    // 盤面生成
+    const board = document.querySelector('table');
+    for (let i = 0; i < 8; i++) {
+      const row = document.createElement('tr');
+      for (let j = 0; j < 8; j++) {
+        const cell = document.createElement('td');
+        cell.addEventListener('click', handleClick);
+        row.appendChild(cell);
+      }
+      board.appendChild(row);
+    }
+
+    // 石の初期配置
+    setInitStone();
+
+    // 石クリック時の処理
+    function handleClick(event) {
+      const cell = event.target;
+      if (cell.classList.contains('black') || cell.classList.contains('white')) {
+        return;
+      }
+
+      // 石を置く処理
+      placeStone(cell);
+
+      // 反転処理
+      reverseStone();
+
+      // 次のターン
+      changeTurn();
+
+      // ゲーム終了判定
+      checkGameOver();
+    }
+
+    // 石を置く処理
+    function placeStone(cell) {
+      // 石の色を取得
+      const currentColor = getCurrentColor();
+
+      // セルに石クラスを追加
+      cell.classList.add(currentColor);
+
+      // 置いた石を含む反転対象セルを取得
+      const targetCells = getReverseTargetCells(cell.dataset.row, cell.dataset.col);
+
+      // セルを反転
+      for (const targetCell of targetCells) {
+        targetCell.classList.toggle('black');
+        targetCell.classList.toggle('white');
+      }
+    }
+
+    // 反転処理
+    function reverseStone() {
+      // 反転対象のセルを取得
+      const targetCells = getReverseTargetCells();
+
+      // セルを反転
+      for (const cell of targetCells) {
+        cell.classList.toggle('black');
+        cell.classList.toggle('white');
+      }
+    }
+
+    // 次のターン
+    function changeTurn() {
+      // 現在の色を取得
+      const currentColor = getCurrentColor();
+
+      // 次の色に切り替え
+      if (currentColor === 'black') {
+        setCurrentColor('white');
+      } else {
+        setCurrentColor('black');
+      }
+    }
+
+    // 現在の色を取得
+    function getCurrentColor() {
+      return document.querySelector('.turn').classList.contains('black') ? 'black' : 'white';
+    }
+
+    // 次の色を設定
+    function setCurrentColor(color) {
+      const turnElement = document.querySelector('.turn');
+      turnElement.classList.remove('black');
+      turnElement.classList.remove('white');
+      turnElement.classList.add(color);
+    }
+
+    // 反転対象のセルを取得
+    function getReverseTargetCells(row, col) {
+      const targetCells = [];
+
+      // 上下左右の方向を調べる
+      const directions = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+      for (const direction of directions) {
+        const deltaRow = direction[0];
+        const deltaCol = direction[1];
+
+        let nextRow = row + deltaRow;
+        let nextCol = col + deltaCol;
+
+        // 範囲外をチェック
+        if (!isInRange(nextRow, nextCol)) {
+          continue;
+        }
+
+        const nextCell = board.querySelector(`tr:nth-child(<span class="math-inline">\{nextRow \+ 1\}\) td\:nth\-child\(</span>{nextCol + 1})`);
+        if (!nextCell.classList.contains('black') && !nextCell.classList.contains
